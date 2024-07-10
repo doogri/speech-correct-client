@@ -1,5 +1,4 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
 
 let mediaRecorder: MediaRecorder;
@@ -7,7 +6,9 @@ let mediaRecorder: MediaRecorder;
 
 
 function App() {
-  
+
+
+  const [isRecording, setIsRecording] = React.useState(false);
 
   function startRecording(event: React.MouseEvent<HTMLButtonElement, MouseEvent>): void {
     navigator.mediaDevices.getUserMedia({ audio: true })
@@ -19,27 +20,24 @@ function App() {
           chunks.push(event.data);
         });
         mediaRecorder.addEventListener('stop', () => {
-         
+          setIsRecording(false); // Set isRecording to false when recording stops
           const audioBlob = new Blob(chunks, { type: 'audio/webm' });
-          console.log(`number of chunks: ${chunks.length}`);
-          
-            //const audioUrl = URL.createObjectURL(audioBlob);
-            // const link = document.createElement('a');
-            // link.href = audioUrl;
-            // link.download = 'recording.webm';
-            // link.click();
-
-            // Store the audio blob locally
-            const audioFile = new File([audioBlob], 'recording.webm', { type: 'audio/webm' });
-            const audioUrl = URL.createObjectURL(audioFile);
-            localStorage.setItem('audioUrl', audioUrl);
+          const audioFile = new File([audioBlob], 'recording.webm', { type: 'audio/webm' });
+          const audioUrl = URL.createObjectURL(audioFile);
+          localStorage.setItem('audioUrl', audioUrl);
         });
+        setIsRecording(true); // Set isRecording to true when recording starts
         mediaRecorder.start();
       })
       .catch((error) => {
         console.error('Error accessing microphone:', error);
       });
   }
+
+  // Add a conditional class to the button based on the isRecording state
+  const recordingButtonClass = isRecording ? 'recording' : '';
+
+  
 
   function stopRecording(event: React.MouseEvent<HTMLButtonElement, MouseEvent>): void {
     mediaRecorder.stop();
@@ -73,23 +71,12 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <button onClick={startRecording}>Start Recording</button>
-        
+        <button onClick={startRecording} className={recordingButtonClass}>
+          {isRecording ? 'Recording...' : 'Start Recording'}
+        </button>
         
         <button onClick={stopRecording}>Stop Recording</button>
         <button onClick={playRecording}>Play Recording</button>
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
       </header>
     </div>
   );
